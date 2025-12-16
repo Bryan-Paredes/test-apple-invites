@@ -63,7 +63,7 @@ export default function WelcomeScreen() {
             className="h-1/2 w-full mt-20"
             entering={SlideInUp.springify().damping(30).duration(1000)}
           >
-            <Marquee events={events} />
+            <Marquee events={events} onIndexChange={setActiveIndex} />
           </Animated.View>
 
           <View className="flex-1 justify-center gap-4 p-4">

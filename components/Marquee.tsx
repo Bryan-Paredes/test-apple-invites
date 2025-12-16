@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   Image,
   ImageSourcePropType,
@@ -8,7 +9,9 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   Easing,
   interpolate,
+  runOnJS,
   SharedValue,
+  useAnimatedReaction,
   useAnimatedStyle,
   useFrameCallback,
   useSharedValue,
@@ -72,14 +75,36 @@ function MarqueeItem({
   );
 }
 
-export default function Marquee({ events }: { events: Event[] }) {
+export default function Marquee({
+  events,
+  onIndexChange,
+}: {
+  events: Event[];
+  onIndexChange: (index: number) => void;
+}) {
   const scroll = useSharedValue(0);
   const scrollSpeed = useSharedValue(50); // pixels per second
   const { width: screenWidth } = useWindowDimensions();
+  const [activeIndex, setActiveIndex] = useState(0);
 
   const itemWidth = screenWidth * 0.7;
 
   const containerWidth = events.length * itemWidth;
+
+  useEffect(() => {
+    if (onIndexChange) {
+      onIndexChange(activeIndex);
+    }
+  }, [activeIndex, onIndexChange]);
+
+  useAnimatedReaction(
+    () => scroll.value,
+    (value) => {
+      const normalizedScroll = (value + screenWidth / 2) % containerWidth;
+      const activeIndex = Math.floor(normalizedScroll / itemWidth);
+      runOnJS(setActiveIndex)(activeIndex);
+    },
+  );
 
   useFrameCallback((frameInfo) => {
     const deltaSeconds = (frameInfo.timeSincePreviousFrame ?? 0) / 1000;
