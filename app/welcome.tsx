@@ -60,7 +60,7 @@ export default function WelcomeScreen() {
         <SafeAreaView edges={["bottom"]}>
           {/* Top Part */}
           <Animated.View
-            className="h-3/5 w-full mt-20"
+            className="h-1/2 w-full mt-20"
             entering={SlideInUp.springify().damping(30).duration(1000)}
           >
             <Marquee events={events} />
