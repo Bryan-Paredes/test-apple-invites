@@ -1,8 +1,17 @@
+import Marquee from "@/components/Marquee";
 import { BlurView } from "expo-blur";
 import { useState } from "react";
-import { Image, Pressable, ScrollView, Text, View } from "react-native";
-import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
+import { Pressable, Text, View } from "react-native";
+import Animated, {
+  FadeIn,
+  FadeInUp,
+  FadeOut,
+  SlideInUp,
+  createAnimatedComponent,
+} from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+const AnimatedPressable = createAnimatedComponent(Pressable);
 
 const events = [
   {
@@ -47,38 +56,52 @@ export default function WelcomeScreen() {
       <View className="absolute inset-0 bg-black/50" />
 
       <BlurView intensity={50}>
-        <SafeAreaView>
-          <View className="h-3/5 w-full">
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              {events.map((event) => (
-                <View key={event.id} className="h-full w-96 p-4 shadow-sm">
-                  <Image
-                    source={event.image}
-                    className="h-full w-full rounded-3xl"
-                  />
-                </View>
-              ))}
-            </ScrollView>
-          </View>
+        {/* This is a quick fix of the SlideInUp bug not taking safe area padding in consideration  */}
+        <SafeAreaView edges={["bottom"]}>
+          {/* Top Part */}
+          <Animated.View
+            className="h-3/5 w-full mt-20"
+            entering={SlideInUp.springify().damping(30).duration(1000)}
+          >
+            <Marquee events={events} />
+          </Animated.View>
 
           <View className="flex-1 justify-center gap-4 p-4">
-            <Text className="text-center text-xl text-white/60 font-bold">
+            <Animated.Text
+              className="text-center text-xl text-white/60 font-bold"
+              entering={FadeInUp.springify()
+                .damping(30)
+                .duration(800)
+                .delay(200)}
+            >
               Welcome to
-            </Text>
-            <Text className="text-white text-center font-bold text-5xl">
+            </Animated.Text>
+            <Animated.Text
+              className="text-white text-center font-bold text-5xl"
+              entering={FadeIn.delay(500).duration(600)}
+            >
               Invites
-            </Text>
-            <Text className="text-center text-lg text-white/60 font-bold mb-5">
+            </Animated.Text>
+            <Animated.Text
+              className="text-center text-lg text-white/60 font-bold mb-5"
+              entering={FadeInUp.springify()
+                .damping(30)
+                .duration(800)
+                .delay(200)}
+            >
               Create beautiful invitatons for your events. Anyone can receive
               invitations.
-            </Text>
-
-            <Pressable
+            </Animated.Text>
+            <AnimatedPressable
               onPress={onButtonPress}
               className="bg-white py-4 px-10 items-center rounded-full self-center"
+              entering={FadeInUp.springify()
+                .damping(30)
+                .duration(800)
+                .delay(200)}
             >
               <Text className="text-lg font-semibold">Create an Event</Text>
-            </Pressable>
+            </AnimatedPressable>
           </View>
         </SafeAreaView>
       </BlurView>
