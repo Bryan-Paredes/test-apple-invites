@@ -1,4 +1,9 @@
-import { Image, ImageSourcePropType, View } from "react-native";
+import {
+  Image,
+  ImageSourcePropType,
+  useWindowDimensions,
+  View,
+} from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   Easing,
@@ -18,22 +23,35 @@ interface EventItemProps {
   event: Event;
   index: number;
   scroll: SharedValue<number>;
+  containerWidth: number;
+  itemWidth: number;
 }
 
-const itemWidth = 300;
+function MarqueeItem({
+  event,
+  index,
+  scroll,
+  containerWidth,
+  itemWidth,
+}: EventItemProps) {
+  const { width: screenWidth } = useWindowDimensions();
 
-function MarqueeItem({ event, index, scroll }: EventItemProps) {
-  const initialPosition = itemWidth * index;
+  const shift = (containerWidth - screenWidth) / 2;
+
+  const initialPosition = itemWidth * index - shift;
 
   const animatedStyle = useAnimatedStyle(() => {
+    const position =
+      ((initialPosition - scroll.value) % containerWidth) + shift;
+
     return {
-      left: initialPosition - scroll.value,
+      left: position,
     };
   });
 
   return (
     <Animated.View
-      className="absolute h-full p-4 shadow-sm"
+      className="absolute h-full p-3 shadow-sm"
       style={[{ width: itemWidth }, animatedStyle]}
     >
       <Image source={event.image} className="h-full w-full rounded-3xl" />
@@ -44,6 +62,11 @@ function MarqueeItem({ event, index, scroll }: EventItemProps) {
 export default function Marquee({ events }: { events: Event[] }) {
   const scroll = useSharedValue(0);
   const scrollSpeed = useSharedValue(50); // pixels per second
+  const { width: screenWidth } = useWindowDimensions();
+
+  const itemWidth = screenWidth * 0.7;
+
+  const containerWidth = events.length * itemWidth;
 
   useFrameCallback((frameInfo) => {
     const deltaSeconds = (frameInfo.timeSincePreviousFrame ?? 0) / 1000;
@@ -74,6 +97,8 @@ export default function Marquee({ events }: { events: Event[] }) {
             event={event}
             index={index}
             scroll={scroll}
+            containerWidth={containerWidth}
+            itemWidth={itemWidth}
           />
         ))}
       </View>
